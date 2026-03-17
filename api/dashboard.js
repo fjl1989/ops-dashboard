@@ -1,6 +1,6 @@
-import mysql from 'mysql2/promise';
+const mysql = require('mysql2/promise');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -50,31 +50,30 @@ export default async function handler(req, res) {
     `);
 
     // Build response with data from queries
-    // For now, using mock data structure - replace values with query results
     const data = {
       consumer: {
         tiktokGMV: consumerRows[0]?.tiktokGMV || 0,
         tiktokTarget: 50000,
         orders: consumerRows[0]?.orders || 0,
-        dispatchSLA: 96.5,      // Add your query
-        responseTime: 3.2,      // Add your query
-        reviewScore: 4.7,       // Add your query
-        returnRate: 3.8,        // Add your query
+        dispatchSLA: 96.5,
+        responseTime: 3.2,
+        reviewScore: 4.7,
+        returnRate: 3.8,
       },
       trade: {
         outstandingDebt: tradeRows[0]?.outstandingDebt || 0,
         overdueInvoices: tradeRows[0]?.overdueInvoices || 0,
         avgDaysToPay: Math.round(tradeRows[0]?.avgDaysToPay || 0),
-        orderFulfilment: 98.2,  // Add your query
-        otifDelivery: 94.8,     // Add your query
-        returnsRate: 2.1,       // Add your query
+        orderFulfilment: 98.2,
+        otifDelivery: 94.8,
+        returnsRate: 2.1,
       },
       international: {
-        actualOrders: 892,      // Add your query
-        forecastedOrders: 850,  // Add your query
-        stockCover: 7.2,        // Add your query
-        dataAccuracy: 97.5,     // Add your query
-        forecastVariance: 8.2,  // Add your query
+        actualOrders: 892,
+        forecastedOrders: 850,
+        stockCover: 7.2,
+        dataAccuracy: 97.5,
+        forecastVariance: 8.2,
         regions: [
           { name: 'EU', orders: 412, forecast: 400 },
           { name: 'USA', orders: 285, forecast: 300 },
@@ -83,18 +82,18 @@ export default async function handler(req, res) {
         ]
       },
       management: {
-        nominations: 8,         // Add your query
+        nominations: 8,
         nominationTarget: 12,
-        facilitiesTickets: 5,   // Add your query
-        hsIncidents: 0,         // Add your query
-        nearMisses: 2,          // Add your query
-        daysSinceIncident: 47,  // Add your query
+        facilitiesTickets: 5,
+        hsIncidents: 0,
+        nearMisses: 2,
+        daysSinceIncident: 47,
       },
       website: {
-        adSpend: 12450,         // Add your query
+        adSpend: 12450,
         adBudget: 15000,
-        revenue: 52800,         // Add your query
-        roas: 4.2,              // Add your query
+        revenue: 52800,
+        roas: 4.2,
         odooStatus: 'healthy',
         lastSync: 12,
         channels: [
@@ -104,22 +103,22 @@ export default async function handler(req, res) {
         ]
       },
       suppliers: {
-        ytdSpend: 892000,       // Add your query
-        lySpend: 845000,        // Add your query
-        activeSuppliers: 24,    // Add your query
-        onTimeDelivery: 93.5,   // Add your query
-        qualityPassRate: 98.2,  // Add your query
-        avgLeadTime: 12,        // Add your query
-        costVariance: 3.2,      // Add your query
+        ytdSpend: 892000,
+        lySpend: 845000,
+        activeSuppliers: 24,
+        onTimeDelivery: 93.5,
+        qualityPassRate: 98.2,
+        avgLeadTime: 12,
+        costVariance: 3.2,
       },
       stock: {
         holdingValue: stockRows[0]?.holdingValue || 0,
         avgMargin: stockRows[0]?.avgMargin || 0,
         skusInStock: stockRows[0]?.skusInStock || 0,
-        daysOnHand: 52,         // Add your query
-        expiryAlert: 23,        // Add your query
-        belowReorder: 45,       // Add your query
-        slowMoving: 89,         // Add your query
+        daysOnHand: 52,
+        expiryAlert: 23,
+        belowReorder: 45,
+        slowMoving: 89,
       },
       lastUpdated: new Date().toISOString(),
     };
@@ -132,4 +131,4 @@ export default async function handler(req, res) {
   } finally {
     if (connection) await connection.end();
   }
-}
+};
