@@ -1,15 +1,66 @@
 import React, { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, CheckCircle, RefreshCw, ShoppingBag, CreditCard, Globe, Users, Monitor, Truck, Package, AlertCircle } from 'lucide-react'
+import { TrendingUp, TrendingDown, CheckCircle, RefreshCw, ShoppingBag, CreditCard, Globe, Users, Monitor, Truck, Package, Edit3, Save, X } from 'lucide-react'
 
-// Fallback mock data (used while loading or if API fails)
-const mockData = {
-  consumer: { tiktokGMV: 0, tiktokTarget: 50000, orders: 0, dispatchSLA: 0, responseTime: 0, reviewScore: 0, returnRate: 0 },
-  trade: { outstandingDebt: 0, overdueInvoices: 0, avgDaysToPay: 0, orderFulfilment: 0, otifDelivery: 0, returnsRate: 0 },
-  international: { actualOrders: 0, forecastedOrders: 1, stockCover: 0, dataAccuracy: 0, forecastVariance: 0, regions: [] },
-  management: { nominations: 0, nominationTarget: 12, facilitiesTickets: 0, hsIncidents: 0, nearMisses: 0, daysSinceIncident: 0 },
-  website: { adSpend: 0, adBudget: 15000, revenue: 0, roas: 0, odooStatus: 'unknown', lastSync: 0, channels: [] },
-  suppliers: { ytdSpend: 0, lySpend: 1, activeSuppliers: 0, onTimeDelivery: 0, qualityPassRate: 0, avgLeadTime: 0, costVariance: 0 },
-  stock: { holdingValue: 0, avgMargin: 0, skusInStock: 0, daysOnHand: 0, expiryAlert: 0, belowReorder: 0, slowMoving: 0 }
+// Default data - edit these values or use the Edit button in the dashboard
+const defaultData = {
+  consumer: {
+    tiktokGMV: 47250,
+    tiktokTarget: 50000,
+    orders: 342,
+    dispatchSLA: 96.5,
+    responseTime: 3.2,
+    reviewScore: 4.7,
+    returnRate: 3.8,
+  },
+  trade: {
+    outstandingDebt: 125400,
+    overdueInvoices: 12,
+    avgDaysToPay: 34,
+    orderFulfilment: 98.2,
+    otifDelivery: 94.8,
+    returnsRate: 2.1,
+  },
+  international: {
+    actualOrders: 892,
+    forecastedOrders: 850,
+    stockCover: 7.2,
+    dataAccuracy: 97.5,
+    forecastVariance: 8.2,
+  },
+  management: {
+    nominations: 8,
+    nominationTarget: 12,
+    facilitiesTickets: 5,
+    hsIncidents: 0,
+    nearMisses: 2,
+    daysSinceIncident: 47,
+  },
+  website: {
+    adSpend: 12450,
+    adBudget: 15000,
+    revenue: 52800,
+    roas: 4.2,
+    odooStatus: 'healthy',
+    lastSync: 12,
+  },
+  suppliers: {
+    ytdSpend: 892000,
+    lySpend: 845000,
+    activeSuppliers: 24,
+    onTimeDelivery: 93.5,
+    qualityPassRate: 98.2,
+    avgLeadTime: 12,
+    costVariance: 3.2,
+  },
+  stock: {
+    holdingValue: 1245000,
+    avgMargin: 42.5,
+    skusInStock: 1847,
+    daysOnHand: 52,
+    expiryAlert: 23,
+    belowReorder: 45,
+    slowMoving: 89,
+  }
 }
 
 const StatusBadge = ({ value, thresholds, format = 'percent', inverse = false }) => {
@@ -44,18 +95,40 @@ const StatusBadge = ({ value, thresholds, format = 'percent', inverse = false })
   )
 }
 
-const MetricCard = ({ label, value, subtext, trend, format = 'number' }) => {
-  const formatted = format === 'currency' ? `£${value.toLocaleString()}` 
-    : format === 'percent' ? `${value}%`
-    : format === 'multiple' ? `${value}x`
-    : value.toLocaleString()
-    
+const EditableValue = ({ value, onChange, isEditing, format = 'number', prefix = '', suffix = '' }) => {
+  if (!isEditing) {
+    const formatted = format === 'currency' ? `£${Number(value).toLocaleString()}` 
+      : format === 'percent' ? `${value}%`
+      : format === 'multiple' ? `${value}x`
+      : Number(value).toLocaleString()
+    return <span style={{ fontSize: '20px', fontWeight: 600, color: '#0f172a' }}>{formatted}</span>
+  }
+  
+  return (
+    <input
+      type="number"
+      value={value}
+      onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+      style={{
+        width: '100px',
+        padding: '4px 8px',
+        fontSize: '16px',
+        fontWeight: 600,
+        border: '2px solid #3b82f6',
+        borderRadius: '6px',
+        outline: 'none',
+      }}
+    />
+  )
+}
+
+const MetricCard = ({ label, value, subtext, trend, format = 'number', isEditing, onChange }) => {
   return (
     <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '12px' }}>
       <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-        <span style={{ fontSize: '20px', fontWeight: 600, color: '#0f172a' }}>{formatted}</span>
-        {trend !== undefined && (
+        <EditableValue value={value} onChange={onChange} isEditing={isEditing} format={format} />
+        {trend !== undefined && !isEditing && (
           <span style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: trend >= 0 ? '#059669' : '#dc2626' }}>
             {trend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
             <span style={{ marginLeft: '2px' }}>{Math.abs(trend)}%</span>
@@ -115,65 +188,97 @@ const Section = ({ title, icon: Icon, color, children, fullWidth }) => {
   )
 }
 
-const AlertItem = ({ count, label, severity }) => {
+const AlertItem = ({ count, label, severity, isEditing, onChange }) => {
   const colors = { danger: '#ef4444', warning: '#f59e0b', info: '#3b82f6' }
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', background: '#f8fafc', borderRadius: '8px', padding: '10px' }}>
       <div style={{ width: '8px', height: '8px', borderRadius: '50%', marginTop: '5px', flexShrink: 0, background: colors[severity] }} />
       <div style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
-        <strong style={{ color: '#1e293b' }}>{count} SKUs</strong> {label}
+        {isEditing ? (
+          <input
+            type="number"
+            value={count}
+            onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+            style={{ width: '60px', padding: '2px 6px', fontSize: '12px', fontWeight: 600, border: '2px solid #3b82f6', borderRadius: '4px', marginRight: '4px' }}
+          />
+        ) : (
+          <strong style={{ color: '#1e293b' }}>{count} SKUs</strong>
+        )}
+        {!isEditing && ' '}{label}
       </div>
     </div>
   )
 }
 
-export default function App() {
-  const [data, setData] = useState(mockData)
-  const [lastUpdated, setLastUpdated] = useState(new Date())
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+const EditableStatusRow = ({ label, value, isEditing, onChange, thresholds, inverse, format }) => {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
+      <span style={{ fontSize: '13px', color: '#475569' }}>{label}</span>
+      {isEditing ? (
+        <input
+          type="number"
+          step="0.1"
+          value={value}
+          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          style={{ width: '70px', padding: '3px 8px', fontSize: '11px', border: '2px solid #3b82f6', borderRadius: '6px', textAlign: 'center' }}
+        />
+      ) : (
+        <StatusBadge value={value} thresholds={thresholds} inverse={inverse} format={format} />
+      )}
+    </div>
+  )
+}
 
-  const fetchData = async () => {
-    setIsRefreshing(true)
-    setError(null)
-    
-    try {
-      const response = await fetch('/api/dashboard')
-      if (!response.ok) throw new Error('Failed to fetch data')
-      const newData = await response.json()
-      setData(newData)
-      setLastUpdated(new Date())
-    } catch (err) {
-      console.error('Error fetching data:', err)
-      setError(err.message)
-    } finally {
-      setIsRefreshing(false)
-      setIsLoading(false)
-    }
+export default function App() {
+  const [data, setData] = useState(() => {
+    const saved = localStorage.getItem('opsDashboardData')
+    return saved ? JSON.parse(saved) : defaultData
+  })
+  const [lastUpdated, setLastUpdated] = useState(() => {
+    const saved = localStorage.getItem('opsDashboardLastUpdated')
+    return saved ? new Date(saved) : new Date()
+  })
+  const [isEditing, setIsEditing] = useState(false)
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    localStorage.setItem('opsDashboardData', JSON.stringify(data))
+  }, [data])
+
+  const updateField = (section, field, value) => {
+    setData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }))
   }
 
-  // Fetch data on load and every 5 minutes
-  useEffect(() => {
-    fetchData()
-    const interval = setInterval(fetchData, 5 * 60 * 1000)
-    return () => clearInterval(interval)
-  }, [])
+  const saveChanges = () => {
+    setIsEditing(false)
+    setLastUpdated(new Date())
+    localStorage.setItem('opsDashboardLastUpdated', new Date().toISOString())
+  }
+
+  const cancelChanges = () => {
+    const saved = localStorage.getItem('opsDashboardData')
+    if (saved) setData(JSON.parse(saved))
+    setIsEditing(false)
+  }
+
+  const resetToDefaults = () => {
+    if (window.confirm('Reset all data to defaults?')) {
+      setData(defaultData)
+      setLastUpdated(new Date())
+      localStorage.setItem('opsDashboardData', JSON.stringify(defaultData))
+      localStorage.setItem('opsDashboardLastUpdated', new Date().toISOString())
+    }
+  }
 
   const variance = data.international.forecastedOrders > 0 
     ? ((data.international.actualOrders - data.international.forecastedOrders) / data.international.forecastedOrders * 100).toFixed(1)
     : 0
-
-  if (isLoading) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-        <div style={{ textAlign: 'center' }}>
-          <RefreshCw size={32} style={{ animation: 'spin 1s linear infinite', color: '#64748b' }} />
-          <p style={{ marginTop: '12px', color: '#64748b' }}>Loading dashboard...</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f1f5f9', padding: '20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -182,31 +287,65 @@ export default function App() {
           <div>
             <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Ops Dashboard</h1>
             <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0' }}>
-              Last updated: {lastUpdated.toLocaleTimeString()}
-              {error && <span style={{ color: '#dc2626', marginLeft: '8px' }}>⚠ {error}</span>}
+              Last updated: {lastUpdated.toLocaleString()}
             </p>
           </div>
-          <button
-            onClick={fetchData}
-            disabled={isRefreshing}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 16px',
-              background: 'white',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: 500,
-              color: '#475569',
-              cursor: 'pointer',
-            }}
-          >
-            <RefreshCw size={16} style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }} />
-            Refresh
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {isEditing ? (
+              <>
+                <button
+                  onClick={saveChanges}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px',
+                    background: '#059669', border: 'none', borderRadius: '8px',
+                    fontSize: '14px', fontWeight: 500, color: 'white', cursor: 'pointer',
+                  }}
+                >
+                  <Save size={16} /> Save
+                </button>
+                <button
+                  onClick={cancelChanges}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px',
+                    background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px',
+                    fontSize: '14px', fontWeight: 500, color: '#475569', cursor: 'pointer',
+                  }}
+                >
+                  <X size={16} /> Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px',
+                    background: '#3b82f6', border: 'none', borderRadius: '8px',
+                    fontSize: '14px', fontWeight: 500, color: 'white', cursor: 'pointer',
+                  }}
+                >
+                  <Edit3 size={16} /> Edit Data
+                </button>
+                <button
+                  onClick={resetToDefaults}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px',
+                    background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px',
+                    fontSize: '14px', fontWeight: 500, color: '#475569', cursor: 'pointer',
+                  }}
+                >
+                  <RefreshCw size={16} /> Reset
+                </button>
+              </>
+            )}
+          </div>
         </div>
+
+        {isEditing && (
+          <div style={{ background: '#dbeafe', border: '1px solid #3b82f6', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '14px', color: '#1e40af' }}>
+            ✏️ <strong>Edit Mode:</strong> Click on any value to change it. Press Save when done.
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
           
@@ -217,21 +356,26 @@ export default function App() {
                 value={data.consumer.tiktokGMV} 
                 format="currency"
                 subtext={`${((data.consumer.tiktokGMV / data.consumer.tiktokTarget) * 100).toFixed(0)}% of target`}
+                isEditing={isEditing}
+                onChange={(v) => updateField('consumer', 'tiktokGMV', v)}
               />
-              <MetricCard label="Orders MTD" value={data.consumer.orders} />
+              <MetricCard 
+                label="Orders MTD" 
+                value={data.consumer.orders}
+                isEditing={isEditing}
+                onChange={(v) => updateField('consumer', 'orders', v)}
+              />
             </div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '13px', color: '#475569' }}>Dispatch SLA</span>
-                <StatusBadge value={data.consumer.dispatchSLA} thresholds={{ warning: 95, danger: 90 }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '13px', color: '#475569' }}>Response time</span>
-                <StatusBadge value={data.consumer.responseTime} thresholds={{ warning: 4, danger: 6 }} inverse format="hrs" />
-              </div>
+              <EditableStatusRow label="Dispatch SLA" value={data.consumer.dispatchSLA} isEditing={isEditing} onChange={(v) => updateField('consumer', 'dispatchSLA', v)} thresholds={{ warning: 95, danger: 90 }} />
+              <EditableStatusRow label="Response time" value={data.consumer.responseTime} isEditing={isEditing} onChange={(v) => updateField('consumer', 'responseTime', v)} thresholds={{ warning: 4, danger: 6 }} inverse format="hrs" />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
                 <span style={{ fontSize: '13px', color: '#475569' }}>Review score</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#dbeafe', color: '#1d4ed8' }}>{data.consumer.reviewScore}/5</span>
+                {isEditing ? (
+                  <input type="number" step="0.1" value={data.consumer.reviewScore} onChange={(e) => updateField('consumer', 'reviewScore', parseFloat(e.target.value) || 0)} style={{ width: '70px', padding: '3px 8px', fontSize: '11px', border: '2px solid #3b82f6', borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#dbeafe', color: '#1d4ed8' }}>{data.consumer.reviewScore}/5</span>
+                )}
               </div>
             </div>
           </Section>
@@ -243,26 +387,21 @@ export default function App() {
                 value={data.trade.outstandingDebt} 
                 format="currency"
                 subtext={`${data.trade.overdueInvoices} invoices overdue`}
+                isEditing={isEditing}
+                onChange={(v) => updateField('trade', 'outstandingDebt', v)}
               />
               <MetricCard 
                 label="Avg days to pay" 
                 value={data.trade.avgDaysToPay}
                 subtext="Target: 30 days"
+                isEditing={isEditing}
+                onChange={(v) => updateField('trade', 'avgDaysToPay', v)}
               />
             </div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '13px', color: '#475569' }}>Order fulfilment</span>
-                <StatusBadge value={data.trade.orderFulfilment} thresholds={{ warning: 97, danger: 95 }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '13px', color: '#475569' }}>OTIF delivery</span>
-                <StatusBadge value={data.trade.otifDelivery} thresholds={{ warning: 93, danger: 90 }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-                <span style={{ fontSize: '13px', color: '#475569' }}>Returns rate</span>
-                <StatusBadge value={data.trade.returnsRate} thresholds={{ warning: 3, danger: 5 }} inverse />
-              </div>
+              <EditableStatusRow label="Order fulfilment" value={data.trade.orderFulfilment} isEditing={isEditing} onChange={(v) => updateField('trade', 'orderFulfilment', v)} thresholds={{ warning: 97, danger: 95 }} />
+              <EditableStatusRow label="OTIF delivery" value={data.trade.otifDelivery} isEditing={isEditing} onChange={(v) => updateField('trade', 'otifDelivery', v)} thresholds={{ warning: 93, danger: 90 }} />
+              <EditableStatusRow label="Returns rate" value={data.trade.returnsRate} isEditing={isEditing} onChange={(v) => updateField('trade', 'returnsRate', v)} thresholds={{ warning: 3, danger: 5 }} inverse />
             </div>
           </Section>
 
@@ -270,32 +409,39 @@ export default function App() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
               <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '12px' }}>
                 <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Orders vs forecast</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                  <span style={{ fontSize: '20px', fontWeight: 600, color: '#0f172a' }}>{variance > 0 ? '+' : ''}{variance}%</span>
-                  {variance >= 0 ? <TrendingUp size={14} color="#059669" /> : <TrendingDown size={14} color="#dc2626" />}
-                </div>
-                <div style={{ display: 'flex', gap: '3px', height: '24px', alignItems: 'flex-end', marginTop: '8px' }}>
-                  {[60, 80, 45, 90, 70, 85].map((h, i) => (
-                    <div key={i} style={{ flex: 1, background: '#60a5fa', borderRadius: '2px 2px 0 0', height: `${h * 0.35}px` }} />
-                  ))}
-                </div>
+                {isEditing ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ fontSize: '10px', color: '#64748b' }}>Actual:</div>
+                    <input type="number" value={data.international.actualOrders} onChange={(e) => updateField('international', 'actualOrders', parseInt(e.target.value) || 0)} style={{ width: '80px', padding: '4px 8px', fontSize: '14px', border: '2px solid #3b82f6', borderRadius: '6px' }} />
+                    <div style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>Forecast:</div>
+                    <input type="number" value={data.international.forecastedOrders} onChange={(e) => updateField('international', 'forecastedOrders', parseInt(e.target.value) || 0)} style={{ width: '80px', padding: '4px 8px', fontSize: '14px', border: '2px solid #3b82f6', borderRadius: '6px' }} />
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                      <span style={{ fontSize: '20px', fontWeight: 600, color: '#0f172a' }}>{variance > 0 ? '+' : ''}{variance}%</span>
+                      {variance >= 0 ? <TrendingUp size={14} color="#059669" /> : <TrendingDown size={14} color="#dc2626" />}
+                    </div>
+                    <div style={{ display: 'flex', gap: '3px', height: '24px', alignItems: 'flex-end', marginTop: '8px' }}>
+                      {[60, 80, 45, 90, 70, 85].map((h, i) => (
+                        <div key={i} style={{ flex: 1, background: '#60a5fa', borderRadius: '2px 2px 0 0', height: `${h * 0.35}px` }} />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
               <MetricCard 
                 label="Stock cover" 
                 value={data.international.stockCover}
                 subtext="Target: 8 weeks"
                 format="number"
+                isEditing={isEditing}
+                onChange={(v) => updateField('international', 'stockCover', v)}
               />
             </div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '13px', color: '#475569' }}>Data accuracy</span>
-                <StatusBadge value={data.international.dataAccuracy} thresholds={{ warning: 95, danger: 90 }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-                <span style={{ fontSize: '13px', color: '#475569' }}>Forecast variance</span>
-                <StatusBadge value={data.international.forecastVariance} thresholds={{ warning: 10, danger: 15 }} inverse format="percent" />
-              </div>
+              <EditableStatusRow label="Data accuracy" value={data.international.dataAccuracy} isEditing={isEditing} onChange={(v) => updateField('international', 'dataAccuracy', v)} thresholds={{ warning: 95, danger: 90 }} />
+              <EditableStatusRow label="Forecast variance" value={data.international.forecastVariance} isEditing={isEditing} onChange={(v) => updateField('international', 'forecastVariance', v)} thresholds={{ warning: 10, danger: 15 }} inverse format="percent" />
             </div>
           </Section>
 
@@ -304,22 +450,38 @@ export default function App() {
               <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Recognition scheme</div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
                 <span style={{ color: '#64748b' }}>Nominations this month</span>
-                <span style={{ fontWeight: 600 }}>{data.management.nominations}/{data.management.nominationTarget}</span>
+                {isEditing ? (
+                  <input type="number" value={data.management.nominations} onChange={(e) => updateField('management', 'nominations', parseInt(e.target.value) || 0)} style={{ width: '50px', padding: '2px 6px', fontSize: '12px', border: '2px solid #3b82f6', borderRadius: '4px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ fontWeight: 600 }}>{data.management.nominations}/{data.management.nominationTarget}</span>
+                )}
               </div>
               <ProgressBar value={data.management.nominations} max={data.management.nominationTarget} />
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
                 <span style={{ fontSize: '13px', color: '#475569' }}>Facilities tickets open</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#fef3c7', color: '#b45309' }}>{data.management.facilitiesTickets}</span>
+                {isEditing ? (
+                  <input type="number" value={data.management.facilitiesTickets} onChange={(e) => updateField('management', 'facilitiesTickets', parseInt(e.target.value) || 0)} style={{ width: '50px', padding: '3px 8px', fontSize: '11px', border: '2px solid #3b82f6', borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#fef3c7', color: '#b45309' }}>{data.management.facilitiesTickets}</span>
+                )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
                 <span style={{ fontSize: '13px', color: '#475569' }}>H&S incidents (MTD)</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#d1fae5', color: '#047857' }}>{data.management.hsIncidents}</span>
+                {isEditing ? (
+                  <input type="number" value={data.management.hsIncidents} onChange={(e) => updateField('management', 'hsIncidents', parseInt(e.target.value) || 0)} style={{ width: '50px', padding: '3px 8px', fontSize: '11px', border: '2px solid #3b82f6', borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#d1fae5', color: '#047857' }}>{data.management.hsIncidents}</span>
+                )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
                 <span style={{ fontSize: '13px', color: '#475569' }}>Near misses reported</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#dbeafe', color: '#1d4ed8' }}>{data.management.nearMisses}</span>
+                {isEditing ? (
+                  <input type="number" value={data.management.nearMisses} onChange={(e) => updateField('management', 'nearMisses', parseInt(e.target.value) || 0)} style={{ width: '50px', padding: '3px 8px', fontSize: '11px', border: '2px solid #3b82f6', borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#dbeafe', color: '#1d4ed8' }}>{data.management.nearMisses}</span>
+                )}
               </div>
             </div>
           </Section>
@@ -331,12 +493,16 @@ export default function App() {
                 value={data.website.adSpend} 
                 format="currency"
                 subtext={`Budget: £${data.website.adBudget.toLocaleString()}`}
+                isEditing={isEditing}
+                onChange={(v) => updateField('website', 'adSpend', v)}
               />
               <MetricCard 
                 label="ROAS" 
                 value={data.website.roas} 
                 format="multiple"
                 subtext="Target: 4x"
+                isEditing={isEditing}
+                onChange={(v) => updateField('website', 'roas', v)}
               />
             </div>
             <div>
@@ -348,7 +514,11 @@ export default function App() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
                 <span style={{ fontSize: '13px', color: '#475569' }}>Last sync</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#dbeafe', color: '#1d4ed8' }}>{data.website.lastSync} mins ago</span>
+                {isEditing ? (
+                  <input type="number" value={data.website.lastSync} onChange={(e) => updateField('website', 'lastSync', parseInt(e.target.value) || 0)} style={{ width: '50px', padding: '3px 8px', fontSize: '11px', border: '2px solid #3b82f6', borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#dbeafe', color: '#1d4ed8' }}>{data.website.lastSync} mins ago</span>
+                )}
               </div>
             </div>
           </Section>
@@ -360,41 +530,43 @@ export default function App() {
                 value={data.suppliers.ytdSpend} 
                 format="currency"
                 trend={data.suppliers.lySpend > 0 ? parseFloat(((data.suppliers.ytdSpend - data.suppliers.lySpend) / data.suppliers.lySpend * 100).toFixed(1)) : 0}
+                isEditing={isEditing}
+                onChange={(v) => updateField('suppliers', 'ytdSpend', v)}
               />
               <MetricCard 
                 label="Avg lead time" 
                 value={data.suppliers.avgLeadTime}
                 subtext={`${data.suppliers.activeSuppliers} suppliers`}
+                isEditing={isEditing}
+                onChange={(v) => updateField('suppliers', 'avgLeadTime', v)}
               />
             </div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '13px', color: '#475569' }}>On-time delivery</span>
-                <StatusBadge value={data.suppliers.onTimeDelivery} thresholds={{ warning: 93, danger: 90 }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '13px', color: '#475569' }}>Quality pass rate</span>
-                <StatusBadge value={data.suppliers.qualityPassRate} thresholds={{ warning: 97, danger: 95 }} />
-              </div>
+              <EditableStatusRow label="On-time delivery" value={data.suppliers.onTimeDelivery} isEditing={isEditing} onChange={(v) => updateField('suppliers', 'onTimeDelivery', v)} thresholds={{ warning: 93, danger: 90 }} />
+              <EditableStatusRow label="Quality pass rate" value={data.suppliers.qualityPassRate} isEditing={isEditing} onChange={(v) => updateField('suppliers', 'qualityPassRate', v)} thresholds={{ warning: 97, danger: 95 }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
                 <span style={{ fontSize: '13px', color: '#475569' }}>Cost variance</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#fee2e2', color: '#b91c1c' }}>+{data.suppliers.costVariance}%</span>
+                {isEditing ? (
+                  <input type="number" step="0.1" value={data.suppliers.costVariance} onChange={(e) => updateField('suppliers', 'costVariance', parseFloat(e.target.value) || 0)} style={{ width: '70px', padding: '3px 8px', fontSize: '11px', border: '2px solid #3b82f6', borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#fee2e2', color: '#b91c1c' }}>+{data.suppliers.costVariance}%</span>
+                )}
               </div>
             </div>
           </Section>
 
           <Section title="Stock" icon={Package} color="green" fullWidth>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '16px' }}>
-              <MetricCard label="Holding value" value={data.stock.holdingValue} format="currency" />
-              <MetricCard label="Avg margin" value={data.stock.avgMargin} format="percent" />
-              <MetricCard label="SKUs in stock" value={data.stock.skusInStock} />
-              <MetricCard label="Days on hand" value={data.stock.daysOnHand} subtext="Target: 45 days" />
+              <MetricCard label="Holding value" value={data.stock.holdingValue} format="currency" isEditing={isEditing} onChange={(v) => updateField('stock', 'holdingValue', v)} />
+              <MetricCard label="Avg margin" value={data.stock.avgMargin} format="percent" isEditing={isEditing} onChange={(v) => updateField('stock', 'avgMargin', v)} />
+              <MetricCard label="SKUs in stock" value={data.stock.skusInStock} isEditing={isEditing} onChange={(v) => updateField('stock', 'skusInStock', v)} />
+              <MetricCard label="Days on hand" value={data.stock.daysOnHand} subtext="Target: 45 days" isEditing={isEditing} onChange={(v) => updateField('stock', 'daysOnHand', v)} />
             </div>
             <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Potential issues</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-              <AlertItem count={data.stock.expiryAlert} label="approaching expiry (next 30 days)" severity="danger" />
-              <AlertItem count={data.stock.belowReorder} label="below reorder point" severity="warning" />
-              <AlertItem count={data.stock.slowMoving} label="with slow-moving flag (>90 days)" severity="info" />
+              <AlertItem count={data.stock.expiryAlert} label="approaching expiry (next 30 days)" severity="danger" isEditing={isEditing} onChange={(v) => updateField('stock', 'expiryAlert', v)} />
+              <AlertItem count={data.stock.belowReorder} label="below reorder point" severity="warning" isEditing={isEditing} onChange={(v) => updateField('stock', 'belowReorder', v)} />
+              <AlertItem count={data.stock.slowMoving} label="with slow-moving flag (>90 days)" severity="info" isEditing={isEditing} onChange={(v) => updateField('stock', 'slowMoving', v)} />
             </div>
           </Section>
 
