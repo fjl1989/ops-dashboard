@@ -1,79 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, CheckCircle, RefreshCw, ShoppingBag, CreditCard, Globe, Users, Monitor, Truck, Package } from 'lucide-react'
+import { TrendingUp, TrendingDown, CheckCircle, RefreshCw, ShoppingBag, CreditCard, Globe, Users, Monitor, Truck, Package, AlertCircle } from 'lucide-react'
 
-// ============================================================
-// MOCK DATA - Replace with API calls to your PostgreSQL/MySQL
-// ============================================================
+// Fallback mock data (used while loading or if API fails)
 const mockData = {
-  consumer: {
-    tiktokGMV: 47250,
-    tiktokTarget: 50000,
-    orders: 342,
-    dispatchSLA: 96.5,
-    responseTime: 3.2,
-    reviewScore: 4.7,
-    returnRate: 3.8,
-  },
-  trade: {
-    outstandingDebt: 125400,
-    overdueInvoices: 12,
-    avgDaysToPay: 34,
-    orderFulfilment: 98.2,
-    otifDelivery: 94.8,
-    returnsRate: 2.1,
-  },
-  international: {
-    actualOrders: 892,
-    forecastedOrders: 850,
-    stockCover: 7.2,
-    dataAccuracy: 97.5,
-    forecastVariance: 8.2,
-    regions: [
-      { name: 'EU', orders: 412, forecast: 400 },
-      { name: 'USA', orders: 285, forecast: 300 },
-      { name: 'APAC', orders: 142, forecast: 120 },
-      { name: 'ROW', orders: 53, forecast: 30 },
-    ]
-  },
-  management: {
-    nominations: 8,
-    nominationTarget: 12,
-    facilitiesTickets: 5,
-    hsIncidents: 0,
-    nearMisses: 2,
-    daysSinceIncident: 47,
-  },
-  website: {
-    adSpend: 12450,
-    adBudget: 15000,
-    revenue: 52800,
-    roas: 4.2,
-    odooStatus: 'healthy',
-    lastSync: 12,
-    channels: [
-      { name: 'Google Ads', spend: 5200, revenue: 23400 },
-      { name: 'Meta', spend: 4800, revenue: 18200 },
-      { name: 'TikTok', spend: 2450, revenue: 11200 },
-    ]
-  },
-  suppliers: {
-    ytdSpend: 892000,
-    lySpend: 845000,
-    activeSuppliers: 24,
-    onTimeDelivery: 93.5,
-    qualityPassRate: 98.2,
-    avgLeadTime: 12,
-    costVariance: 3.2,
-  },
-  stock: {
-    holdingValue: 1245000,
-    avgMargin: 42.5,
-    skusInStock: 1847,
-    daysOnHand: 52,
-    expiryAlert: 23,
-    belowReorder: 45,
-    slowMoving: 89,
-  }
+  consumer: { tiktokGMV: 0, tiktokTarget: 50000, orders: 0, dispatchSLA: 0, responseTime: 0, reviewScore: 0, returnRate: 0 },
+  trade: { outstandingDebt: 0, overdueInvoices: 0, avgDaysToPay: 0, orderFulfilment: 0, otifDelivery: 0, returnsRate: 0 },
+  international: { actualOrders: 0, forecastedOrders: 1, stockCover: 0, dataAccuracy: 0, forecastVariance: 0, regions: [] },
+  management: { nominations: 0, nominationTarget: 12, facilitiesTickets: 0, hsIncidents: 0, nearMisses: 0, daysSinceIncident: 0 },
+  website: { adSpend: 0, adBudget: 15000, revenue: 0, roas: 0, odooStatus: 'unknown', lastSync: 0, channels: [] },
+  suppliers: { ytdSpend: 0, lySpend: 1, activeSuppliers: 0, onTimeDelivery: 0, qualityPassRate: 0, avgLeadTime: 0, costVariance: 0 },
+  stock: { holdingValue: 0, avgMargin: 0, skusInStock: 0, daysOnHand: 0, expiryAlert: 0, belowReorder: 0, slowMoving: 0 }
 }
 
 const StatusBadge = ({ value, thresholds, format = 'percent', inverse = false }) => {
@@ -195,23 +131,49 @@ export default function App() {
   const [data, setData] = useState(mockData)
   const [lastUpdated, setLastUpdated] = useState(new Date())
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const refreshData = async () => {
+  const fetchData = async () => {
     setIsRefreshing(true)
-    // In production, uncomment this:
-    // const response = await fetch('/api/dashboard')
-    // setData(await response.json())
-    await new Promise(r => setTimeout(r, 800))
-    setLastUpdated(new Date())
-    setIsRefreshing(false)
+    setError(null)
+    
+    try {
+      const response = await fetch('/api/dashboard')
+      if (!response.ok) throw new Error('Failed to fetch data')
+      const newData = await response.json()
+      setData(newData)
+      setLastUpdated(new Date())
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      setError(err.message)
+    } finally {
+      setIsRefreshing(false)
+      setIsLoading(false)
+    }
   }
 
+  // Fetch data on load and every 5 minutes
   useEffect(() => {
-    const interval = setInterval(refreshData, 5 * 60 * 1000)
+    fetchData()
+    const interval = setInterval(fetchData, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
 
-  const variance = ((data.international.actualOrders - data.international.forecastedOrders) / data.international.forecastedOrders * 100).toFixed(1)
+  const variance = data.international.forecastedOrders > 0 
+    ? ((data.international.actualOrders - data.international.forecastedOrders) / data.international.forecastedOrders * 100).toFixed(1)
+    : 0
+
+  if (isLoading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+        <div style={{ textAlign: 'center' }}>
+          <RefreshCw size={32} style={{ animation: 'spin 1s linear infinite', color: '#64748b' }} />
+          <p style={{ marginTop: '12px', color: '#64748b' }}>Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f1f5f9', padding: '20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -221,10 +183,11 @@ export default function App() {
             <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Ops Dashboard</h1>
             <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0' }}>
               Last updated: {lastUpdated.toLocaleTimeString()}
+              {error && <span style={{ color: '#dc2626', marginLeft: '8px' }}>⚠ {error}</span>}
             </p>
           </div>
           <button
-            onClick={refreshData}
+            onClick={fetchData}
             disabled={isRefreshing}
             style={{
               display: 'flex',
@@ -380,7 +343,7 @@ export default function App() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
                 <span style={{ fontSize: '13px', color: '#475569' }}>Odoo sync status</span>
                 <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#d1fae5', color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <CheckCircle size={10} /> Healthy
+                  <CheckCircle size={10} /> {data.website.odooStatus}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
@@ -396,7 +359,7 @@ export default function App() {
                 label="YTD spend" 
                 value={data.suppliers.ytdSpend} 
                 format="currency"
-                trend={parseFloat(((data.suppliers.ytdSpend - data.suppliers.lySpend) / data.suppliers.lySpend * 100).toFixed(1))}
+                trend={data.suppliers.lySpend > 0 ? parseFloat(((data.suppliers.ytdSpend - data.suppliers.lySpend) / data.suppliers.lySpend * 100).toFixed(1)) : 0}
               />
               <MetricCard 
                 label="Avg lead time" 
