@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, CheckCircle, RefreshCw, ShoppingBag, CreditCard, Globe, Users, Monitor, Truck, Package, ExternalLink } from 'lucide-react'
-import * as XLSX from 'xlsx'
+import { TrendingUp, TrendingDown, CheckCircle, RefreshCw, ShoppingBag, CreditCard, Globe, Users, Monitor, Truck, Package, Edit3, Save, X, Plus, Trash2 } from 'lucide-react'
 
-// =====================================================
-// YOUR ONEDRIVE LINK
-// =====================================================
-const ONEDRIVE_SHARE_LINK = 'https://onedrive.live.com/:x:/g/personal/648F2F7F0BD66099/IQD3_Nq3wITSRrx7FQwtdIS1AdCoTWz8vG4PbazbyitCLxM?resid=648F2F7F0BD66099!sb7dafcf784c046d2bc7b150c2d7484b5&ithint=file%2Cxlsx&e=GvGV8U&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL3gvYy82NDhmMmY3ZjBiZDY2MDk5L0lRRDNfTnEzd0lUU1JyeDdGUXd0ZElTMUFkQ29UV3o4dkc0UGJhemJ5aXRDTHhNP2U9R3ZHVjhV'
+// Nutravet logo as base64
+const LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA+gAAAFKCAYAAACxSeodAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAABnSSURBVHgB7d1RcttIloDhm+N+V+8gvIPRbqC1gtZbmPYKWrMCq1dQ9BY0swK7VlDVW5joFXR7BeN+fxUfIFKOnbJsEUxmQvx+EaEs2SQIECTu5QEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA+qpodAEDHut/vS/X1/+mP/6g+M2NlZaX6vXy/f/v2ra76zKr+yMrKSn3f8uXL/79y9erff/W/N1f//F/V99/6j+P16/8qK/84rl279vfq+z/6z5/99NNP/13/LPl1fPbZZ0/q79/8979//+23/11dXV39S/X1i3v37m1Xv7t9+/bF+vvqe/Xv/r36/b+rf/+nX3755V/qr2/94x//+E+v/7f+8fDhw3+pvn/8+HH1a/V1/f3PP/+8/9VXX/3j559//tf6+/p31fev/vCHP/zvFy9erP7zn//8pPr+h+p3v62/v3379r/X/1vde/LkyaWXP1fvf6z+fPnPf/7zf+jE/l/NfwY8DID3urhz587tGzduPKy/r75uXrt27Wr19dXHjx9f++qrr65Vv1u7du3alet/uHa1+t39mzfXbn388drlGzeu3rh5c/XG9evVdR4+rH6u/l31u4dXr15d+9e//vXqZ599dvUPf/jDler3Vz777LPV2Xf/8Ic/XL18+fLln37//cpnn31W/Xz51uXLV+7fv39l7erVq/X3l6vvP3ny5PJPf/rT5cePH1/+8ssvLz979uzypUuXLlffX/rggw8u/fzzz5cuXbp06Te/+c2l6vvq0qVLP1fffvrzz3+6VH/9/fffX/rwww9//Prrr3+svv/pp5+q/01/qn7/0xdffFH9Xn1df139fOenP/3p0//+7//+8+X6d3fu3Ln00UcfXaq+v/SnP/3pz/Vt/fSnP/1Q/d/l+vs//OEPf6q+v/2nP/3p8vXr1y/V97tUf/3rX39f3XZx9erVP1W/XL58+dKTJ0+qn++u/vTTT/9Wf//rX//6bxcvXvz5ypUrl6p7Va77/fzLX/7yt+q22/8ky4WXnz15AHxI1Hfu/O7y2tqV6vu169evXqlvuH77+pXqd9c/+ODK9errat/t29c//PDK7R//+Mfq+ysffHDlf7/++or2D/31+++vPH/+/Eq+H+f7K/fvX/nyyy+v3L9//cqXX3515csv169cv379ym9+85sr1fdXfvOb31y5fPnylUuXLl35wx+u/F/9/8Mff3yl+n6l+v7KH/94pfq+uv1Pf7ry299eqX6uvq5v/9Ofqq+ff35l/Y9/rL7+sfo++vpPf/pTfe0/Xrlcf19d+nfVJf6zrq6u/v2vf/3rf1W/O64+/k31wd8+/PDDS9V9/la9z+X6Jn/99ddL1c/Xfve7319d/92bW1Y/t/8vyFLh5de3duvWrYdf1m9fv361/r76urqtS9XNV69fv1bd4qU//+Hh/0v8pnp/0Gs//vjjD9fWqt/94x+rX3+srrZSXaz++Mr+b37zy93qd/W9q+tUn6muu139+1/9vf8Rur6yUv9u7bfVz1f+6Z/+6dKzn3++9NtLv7lU3a76e/Xh/9/V7f7Y/lz/DwB8CNq//e0/3fz3f//PP7755gePAPDhuL5x89/f3K+6r+zLd3/99a+bP/z8861qn97+8s/V55Xx/0bAJfPdceLqkw8hPv/8889u3Lh+c+PGjZuff/75jc8/v/7555/f+PyzG9e3f//7G9evXb/x4EH1/Tr++/ra2o1r165fq7659rv165d/+7tf/Hb9zp07v/zFL1e+qH6ufq5+/+tf/+pG9f9/eeXKlUu//e1vr96+8+srV2/8durSzz//+fKPP/748y9+8Yv/rj78Y31f/lL9PJw9oOr61e+/uXXr1td3q7d3qqtvVP9/49q1689+8Ytf/HJaXamufuW3/8t/Vb97/M03K/VtsP8+8Vr98Xf0wQcfXLt58+a1J0+ur/3xj79fu3r1i9+vrf27h9/89rfX/vCHP1xfu3b92traWnUD16rf/Xjy4Y/15/5c/e/+W3U7r1/7X9V71Je59l/+8mj1t7/97afV/16q/u+nS78+Wq9u93Z17Yd379y59dnPXvl39f1vLv324oMH9XWuXL5c/Xbv2qVLly9fvnz1t7/97b/+63/t+8CqnrJy6WL1waf/H+Ht/y+AjzF9jOj1dw4BLorqM+I/b96s3rqWH1d/+MMfr966dfna1atlpfqe/tfl+sv0fdruSPW5Vemvv3qwvvbv/8Pb16v/qx/UWPL6tuo7qv9d/S//Ub39rfrf4vq+UtfQdkOUjb+0+7x9/fVnf65uo/p+vbpQ9fdvfv2nR3ev7v0E+k/qf/9rf/u7/39x99+7uLdP8GNNe/t7v6f/N0B8DHlA+B75zfXhH2d3t63t/7yx8r/+vfqw0P/s4O86PnvE+ub20X1pf9l/X78Bfde3/1H/n/X2N8L/tz5u/0/q+y/3a+C9OXuqT/u/u/+9f/b21/+Y3v7H9t3bf/7b9X9u39++b+8+r/9b/17u/9+++/r+e3vX/u37ff2/78+9+7+6X//t7/37y/p/9z93Txxq1/6h+b9d9xUC7s/S8dTbf9Pvrf8Ou/9R//y/5P7z3v/t76r/v4D/7e/ff31L+x9dP/0/5T/O/v/9+3v/8wD9r+0ZcP72R/w/vPe/5d6+h7///Nd/lP/c9/Nve/+T9jrYf2u9+09c3dd/pHX+2/8XQH8c+P+y96vy3/37f6R1/lP+c+cEfvD/QCfg6a/Z23/V+79779e0P/+F/Wuun+Y/u/7xav9r0P+D/2YA+jEAn0H/d+99y/7H/l9a/2ttf/f/cv73uy9xf5Ye/kfqH/P+R7r3w/6Pf/e7/+3/7n+L/afZ/T/8v9+9Rvsf67/sX3c/af3/PwCdfO1/y/pPv/v7/7v/Z+/+8xz8PoC/rnv/L/V/7P/Vn7/3z9L+t9z/Y/x/e/+b6j/3/+93/x+/+z/7P6p/t/7h+r/3v7H3B7//i/q/u/7j/Yutf9Zetv7H2x/b/8D9f+zf+f5fnf3ftH+oe/+D+/f5X/bf7v8X/k/b/177+90f2b/z/bf8v7n/v/0P7v9m+y/v/+z+z7D/sf0/tv+72/+Q+x/c/7/1F/Z/dv/a9m/5f+3/3t5/5/2fw/+y/3v9H/3u/33/f9t/t/7P3u/+P/u/+57f+/9/e7+3977u/6/3fvd/+z/a/3v9j9f/uv/+/Uf231v/57r/J+uf2f+O+5/Y/6P/u/ez/6u6++v7f3L/x/Y/uf+f9v+v/3P9d3v/o/o/139m/a/1/9X+v+//v/t/un9r/3fp/179u/X/13/v/2f33/H/7v3v/+9P+t//3v/3v+v+f/vfqn93/c/df8v/uf2/1/+//Xu0/wn3/+36n/7P/n/f/7f+/+3/bv37+3+6/6ulf/b+R/f/dv/f/n/b/1v6n/P/dP+n+3+2/7f7f7r/u//2/zr/dv+/9/+Ff29/d/U/dv3Pf//H+7/+/2n9e3v/+v/e/9D/u/l///v/t/e/u/+z+n+7/+v7/9f/Z/df+n/0P3b/rdu/u/+E/z/3v7v7b/7+/+3/+//uP+t/tf0/9v+u/s/+T/f/6f1//+7/cf8f/m/+79v/2f3T/j/v/uP+h/3fr/+y/3f+v/8X9h/Z/sv8/+++/3v7n/c/un/a/9H/t/9H/af/Xf+/9/+5/pX/vf3H/L/t/cn/u/uf3/7r/c/u/u/+7/7/+u/s/9/93/Y/3X/+/93f+/73/+f7r/x/3/7H+l/sf+B/df9v+nf/3/uv/f/3+/+7/ef+n/2f0/6b/rf2j/kf07/0/+3+2/7P9f9v/l/pf/h/uf9z+2/6b/0P7x/t/3P7r/9/3/7H+0/1f67/bfu/+v/3fr/+z/3v7P+n/3/7j/0/7f7P/kf6n/Y/u/6H/b/+P+9/b/sv/B/Zf9/+7/oP/2/v/2/+v93/o/un/t/93/p/+7/u/+/+3/oP8h/e/+O/1/93+7/9P+l/3f6r+3/w/+t/6Pf/3/uv/d/1//e/8f+5/V/7f/u/7//u/6H/t/0P+n/2f/x/pf67/u/93/Yf/Pv/7/2f+h/uP9D+3/4P/H/u/2v/Tv3P/9/1f/u/6/+v9v/b/bf+n/7P+l/23/p/+//Y/+l/2f+//b/+v+v/1v/Q/7D/uf3/+l/2/6H/e/+X/b/df+v/3/97/4P2f/r/7n+x/8H+P/u/3P+7/6P+x/o/+n/u/3f/B/3/+//vf/K/7H/w/+//Xf/t/r/9/+v/3f9x/7f9p/63/Y/3P7D/xf6T/R/2f+t/2H+//1/9H/e/7//p/t3+3+3/c/+H+n/3/+//uf/L/9/+T/Z/uP8P+z/Z/8H+O/tP/J/tf2//3f2/2P/b/o/+b/Y/6P/e/+P+T/t/un/l/l/3P7r/c/+H/y/7H+z/tv/d/5f/e/2f/Q/7r/c/uv+2/337/9j/5f5f9j+6/+3+n+7/Zv/j/m/779z/4v7P9r/3f93/6/5P+6/2f9h/6H+4/5P9r+y/2v/a/qf91/uf9v/ff+H/y/7r+9/tP/6/7P+0/3T/s/v/sv/3/t/t/3b/M/1/+t/bf+V/uf/R/Zf9z/b/uP+//9v9m/v/9f/tf3D/w/7v9/9u/437H/Z/3f9w/6H7H/b/uP/L/V/3/+1/3/+7/bfu/3T/1/0f+v+//8/+t/63/l/9d/t/uv/V/U/7v+//ov/B/u/2//X/7/6v9v/X/7j/Z/1f+++c/4f7v9t/5/6x/dP+z/Y/uv/X/b/u/9d/Z/9V/83+V/bfuH+/+19JHyD/kLr98Q4AAAAAAAAAAAAAAP4//X+xEgfUAfCbfAAAAABJRU5ErkJggg=='
 
 // Nutravet brand colors
 const brand = {
@@ -18,102 +15,59 @@ const brand = {
 
 // Default data
 const defaultData = {
-  reportMonth: 'March 2026',
-  consumer: { tiktokGMV: 0, tiktokTarget: 50000, orders: 0, dispatchSLA: 0, responseTime: 0, reviewScore: 0 },
-  trade: { outstandingDebt: 0, overdueInvoices: 0, avgDaysToPay: 0, orderFulfilment: 0 },
-  international: { actualOrders: 0, forecastedOrders: 1, dataAccuracy: 0, forecastVariance: 0 },
-  management: { nominations: 0, nominationTarget: 12, facilitiesTickets: 0, hsIncidents: 0, nearMisses: 0 },
-  website: { adSpend: 0, adBudget: 15000, roas: 0, odooStatus: 'unknown' },
-  suppliers: { ytdSpend: 0, lySpend: 1, activeSuppliers: 0, onTimeDelivery: 0, qualityPassRate: 0, ordersLastMonth: 0 },
-  stock: { holdingValue: 0, avgMargin: 0, skusInStock: 0, expiryAlert: 0, belowReorder: 0, slowMoving: 0 },
-  products: []
-}
-
-// Convert OneDrive share link to download link
-const getDownloadUrl = (shareLink) => {
-  if (!shareLink || shareLink === 'PASTE_YOUR_LINK_HERE') return null
-  
-  try {
-    // For any OneDrive/1drv link, use the sharing API
-    // Encode the share URL in base64 and use the OneDrive API
-    const base64 = btoa(shareLink)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '')
-    return `https://api.onedrive.com/v1.0/shares/u!${base64}/root/content`
-  } catch (e) {
-    console.error('Error creating download URL:', e)
-    return null
-  }
-}
-
-// Parse Excel data
-const parseExcelData = (workbook) => {
-  const sheet = workbook.Sheets[workbook.SheetNames[0]]
-  const data = { ...defaultData, products: [] }
-  
-  // Field mapping from Excel labels to data structure
-  const fieldMap = {
-    'Report Month': (v) => { data.reportMonth = v },
-    'TikTok GMV': (v) => { data.consumer.tiktokGMV = parseFloat(v) || 0 },
-    'TikTok Target': (v) => { data.consumer.tiktokTarget = parseFloat(v) || 50000 },
-    'Orders MTD': (v) => { data.consumer.orders = parseInt(v) || 0 },
-    'Dispatch SLA': (v) => { data.consumer.dispatchSLA = parseFloat(v) || 0 },
-    'Response Time': (v) => { data.consumer.responseTime = parseFloat(v) || 0 },
-    'Review Score': (v) => { data.consumer.reviewScore = parseFloat(v) || 0 },
-    'Outstanding Debt': (v) => { data.trade.outstandingDebt = parseFloat(v) || 0 },
-    'Overdue Invoices': (v) => { data.trade.overdueInvoices = parseInt(v) || 0 },
-    'Avg Days to Pay': (v) => { data.trade.avgDaysToPay = parseInt(v) || 0 },
-    'Order Fulfilment': (v) => { data.trade.orderFulfilment = parseFloat(v) || 0 },
-    'Actual Orders': (v) => { data.international.actualOrders = parseInt(v) || 0 },
-    'Forecasted Orders': (v) => { data.international.forecastedOrders = parseInt(v) || 1 },
-    'Data Accuracy': (v) => { data.international.dataAccuracy = parseFloat(v) || 0 },
-    'Forecast Variance': (v) => { data.international.forecastVariance = parseFloat(v) || 0 },
-    'Nominations': (v) => { data.management.nominations = parseInt(v) || 0 },
-    'Nomination Target': (v) => { data.management.nominationTarget = parseInt(v) || 12 },
-    'Facilities Tickets': (v) => { data.management.facilitiesTickets = parseInt(v) || 0 },
-    'H&S Incidents': (v) => { data.management.hsIncidents = parseInt(v) || 0 },
-    'Near Misses': (v) => { data.management.nearMisses = parseInt(v) || 0 },
-    'Ad Spend': (v) => { data.website.adSpend = parseFloat(v) || 0 },
-    'Ad Budget': (v) => { data.website.adBudget = parseFloat(v) || 15000 },
-    'ROAS': (v) => { data.website.roas = parseFloat(v) || 0 },
-    'Odoo Status': (v) => { data.website.odooStatus = v || 'unknown' },
-    'YTD Spend': (v) => { data.suppliers.ytdSpend = parseFloat(v) || 0 },
-    'Last Year Spend': (v) => { data.suppliers.lySpend = parseFloat(v) || 1 },
-    'Active Suppliers': (v) => { data.suppliers.activeSuppliers = parseInt(v) || 0 },
-    'On-Time Delivery': (v) => { data.suppliers.onTimeDelivery = parseFloat(v) || 0 },
-    'Quality Pass Rate': (v) => { data.suppliers.qualityPassRate = parseFloat(v) || 0 },
-    'Orders Last Month': (v) => { data.suppliers.ordersLastMonth = parseInt(v) || 0 },
-    'Holding Value': (v) => { data.stock.holdingValue = parseFloat(v) || 0 },
-    'Avg Margin': (v) => { data.stock.avgMargin = parseFloat(v) || 0 },
-    'SKUs in Stock': (v) => { data.stock.skusInStock = parseInt(v) || 0 },
-    'Expiry Alert': (v) => { data.stock.expiryAlert = parseInt(v) || 0 },
-    'Below Reorder': (v) => { data.stock.belowReorder = parseInt(v) || 0 },
-    'Slow Moving': (v) => { data.stock.slowMoving = parseInt(v) || 0 },
-  }
-  
-  // Products mapping
-  const productMap = {}
-  for (let i = 1; i <= 10; i++) {
-    fieldMap[`Product ${i}`] = (v) => { productMap[i] = { ...productMap[i], product: v || '' } }
-    fieldMap[`Months Cover ${i}`] = (v) => { productMap[i] = { ...productMap[i], monthsCover: v || '' } }
-  }
-  
-  // Read all rows
-  const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:C100')
-  for (let row = range.s.r; row <= range.e.r; row++) {
-    const labelCell = sheet[XLSX.utils.encode_cell({ r: row, c: 0 })]
-    const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: 1 })]
-    
-    if (labelCell && valueCell && fieldMap[labelCell.v]) {
-      fieldMap[labelCell.v](valueCell.v)
-    }
-  }
-  
-  // Convert products to array
-  data.products = Object.values(productMap).filter(p => p.product || p.monthsCover)
-  
-  return data
+  consumer: {
+    tiktokGMV: 47250,
+    tiktokTarget: 50000,
+    orders: 342,
+    dispatchSLA: 96.5,
+    responseTime: 3.2,
+    reviewScore: 4.7,
+  },
+  trade: {
+    outstandingDebt: 125400,
+    overdueInvoices: 12,
+    avgDaysToPay: 34,
+    orderFulfilment: 98.2,
+  },
+  international: {
+    actualOrders: 892,
+    forecastedOrders: 850,
+    dataAccuracy: 97.5,
+    forecastVariance: 8.2,
+  },
+  management: {
+    nominations: 8,
+    nominationTarget: 12,
+    facilitiesTickets: 5,
+    hsIncidents: 0,
+    nearMisses: 2,
+  },
+  website: {
+    adSpend: 12450,
+    adBudget: 15000,
+    roas: 4.2,
+    odooStatus: 'healthy',
+  },
+  suppliers: {
+    ytdSpend: 892000,
+    lySpend: 845000,
+    activeSuppliers: 24,
+    onTimeDelivery: 93.5,
+    qualityPassRate: 98.2,
+    ordersLastMonth: 156,
+  },
+  stock: {
+    holdingValue: 1245000,
+    avgMargin: 42.5,
+    skusInStock: 1847,
+    expiryAlert: 23,
+    belowReorder: 45,
+    slowMoving: 89,
+    productIssues: [
+      { product: '', monthsCover: '' },
+    ]
+  },
+  reportMonth: new Date().toLocaleString('default', { month: 'long', year: 'numeric' })
 }
 
 const StatusBadge = ({ value, thresholds, format = 'percent', inverse = false }) => {
@@ -148,18 +102,40 @@ const StatusBadge = ({ value, thresholds, format = 'percent', inverse = false })
   )
 }
 
-const MetricCard = ({ label, value, subtext, trend, format = 'number' }) => {
-  const formatted = format === 'currency' ? `£${Number(value).toLocaleString()}` 
-    : format === 'percent' ? `${value}%`
-    : format === 'multiple' ? `${value}x`
-    : Number(value).toLocaleString()
-    
+const EditableValue = ({ value, onChange, isEditing, format = 'number' }) => {
+  if (!isEditing) {
+    const formatted = format === 'currency' ? `£${Number(value).toLocaleString()}` 
+      : format === 'percent' ? `${value}%`
+      : format === 'multiple' ? `${value}x`
+      : Number(value).toLocaleString()
+    return <span style={{ fontSize: '20px', fontWeight: 600, color: brand.brown }}>{formatted}</span>
+  }
+  
+  return (
+    <input
+      type="number"
+      value={value}
+      onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+      style={{
+        width: '100px',
+        padding: '4px 8px',
+        fontSize: '16px',
+        fontWeight: 600,
+        border: `2px solid ${brand.brown}`,
+        borderRadius: '6px',
+        outline: 'none',
+      }}
+    />
+  )
+}
+
+const MetricCard = ({ label, value, subtext, trend, format = 'number', isEditing, onChange }) => {
   return (
     <div style={{ background: brand.cream, borderRadius: '8px', padding: '12px' }}>
       <div style={{ fontSize: '10px', color: brand.brownLight, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-        <span style={{ fontSize: '20px', fontWeight: 600, color: brand.brown }}>{formatted}</span>
-        {trend !== undefined && (
+        <EditableValue value={value} onChange={onChange} isEditing={isEditing} format={format} />
+        {trend !== undefined && !isEditing && (
           <span style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: trend >= 0 ? '#059669' : '#dc2626' }}>
             {trend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
             <span style={{ marginLeft: '2px' }}>{Math.abs(trend)}%</span>
@@ -209,94 +185,165 @@ const Section = ({ title, icon: Icon, children, fullWidth }) => {
   )
 }
 
-const AlertItem = ({ count, label, severity }) => {
+const AlertItem = ({ count, label, severity, isEditing, onChange }) => {
   const colors = { danger: '#ef4444', warning: '#f59e0b', info: brand.brown }
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', background: brand.cream, borderRadius: '8px', padding: '10px' }}>
       <div style={{ width: '8px', height: '8px', borderRadius: '50%', marginTop: '5px', flexShrink: 0, background: colors[severity] }} />
       <div style={{ fontSize: '12px', color: brand.brownLight, lineHeight: 1.4 }}>
-        <strong style={{ color: brand.brown }}>{count} SKUs</strong> {label}
+        {isEditing ? (
+          <input
+            type="number"
+            value={count}
+            onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+            style={{ width: '60px', padding: '2px 6px', fontSize: '12px', fontWeight: 600, border: `2px solid ${brand.brown}`, borderRadius: '4px', marginRight: '4px' }}
+          />
+        ) : (
+          <strong style={{ color: brand.brown }}>{count} SKUs</strong>
+        )}
+        {!isEditing && ' '}{label}
       </div>
     </div>
   )
 }
 
-const StatusRow = ({ label, value, thresholds, inverse, format, noBorder }) => {
+const EditableStatusRow = ({ label, value, isEditing, onChange, thresholds, inverse, format, noBorder }) => {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: noBorder ? 'none' : `1px solid ${brand.cream}` }}>
       <span style={{ fontSize: '13px', color: brand.brownLight }}>{label}</span>
-      <StatusBadge value={value} thresholds={thresholds} inverse={inverse} format={format} />
+      {isEditing ? (
+        <input
+          type="number"
+          step="0.1"
+          value={value}
+          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          style={{ width: '70px', padding: '3px 8px', fontSize: '11px', border: `2px solid ${brand.brown}`, borderRadius: '6px', textAlign: 'center' }}
+        />
+      ) : (
+        <StatusBadge value={value} thresholds={thresholds} inverse={inverse} format={format} />
+      )}
     </div>
   )
 }
 
-const ProductIssueRow = ({ product, monthsCover }) => {
-  if (!product && !monthsCover) return null
+const ProductIssueRow = ({ product, monthsCover, isEditing, onProductChange, onMonthsChange, onDelete, showDelete }) => {
+  if (!isEditing) {
+    if (!product && !monthsCover) return null
+    return (
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: brand.cream, borderRadius: '6px', marginBottom: '6px' }}>
+        <span style={{ fontSize: '13px', color: brand.brown, fontWeight: 500 }}>{product || '—'}</span>
+        <span style={{ fontSize: '13px', color: brand.brownLight }}>{monthsCover ? `${monthsCover} months` : '—'}</span>
+      </div>
+    )
+  }
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: brand.cream, borderRadius: '6px', marginBottom: '6px' }}>
-      <span style={{ fontSize: '13px', color: brand.brown, fontWeight: 500 }}>{product || '—'}</span>
-      <span style={{ fontSize: '13px', color: brand.brownLight }}>{monthsCover ? `${monthsCover} months` : '—'}</span>
+    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+      <input
+        type="text"
+        placeholder="Product name"
+        value={product}
+        onChange={(e) => onProductChange(e.target.value)}
+        style={{ flex: 1, padding: '8px 10px', fontSize: '13px', border: `1px solid ${brand.creamDark}`, borderRadius: '6px', outline: 'none' }}
+      />
+      <input
+        type="number"
+        placeholder="Months"
+        value={monthsCover}
+        onChange={(e) => onMonthsChange(e.target.value)}
+        style={{ width: '80px', padding: '8px 10px', fontSize: '13px', border: `1px solid ${brand.creamDark}`, borderRadius: '6px', outline: 'none', textAlign: 'center' }}
+      />
+      {showDelete && (
+        <button onClick={onDelete} style={{ padding: '6px', background: '#fee2e2', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Trash2 size={14} color="#b91c1c" />
+        </button>
+      )}
     </div>
   )
 }
 
 export default function App() {
-  const [data, setData] = useState(defaultData)
-  const [lastUpdated, setLastUpdated] = useState(new Date())
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [data, setData] = useState(() => {
+    const saved = localStorage.getItem('nutravetDashboardData')
+    return saved ? JSON.parse(saved) : defaultData
+  })
+  const [lastUpdated, setLastUpdated] = useState(() => {
+    const saved = localStorage.getItem('nutravetDashboardLastUpdated')
+    return saved ? new Date(saved) : new Date()
+  })
+  const [isEditing, setIsEditing] = useState(false)
 
-  const fetchData = async () => {
-    const downloadUrl = getDownloadUrl(ONEDRIVE_SHARE_LINK)
-    
-    if (!downloadUrl) {
-      setError('OneDrive link not configured.')
-      setIsLoading(false)
-      return
-    }
+  useEffect(() => {
+    localStorage.setItem('nutravetDashboardData', JSON.stringify(data))
+  }, [data])
 
-    setIsLoading(true)
-    setError(null)
-    
-    try {
-      const response = await fetch(downloadUrl)
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      
-      const arrayBuffer = await response.arrayBuffer()
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' })
-      const parsedData = parseExcelData(workbook)
-      
-      setData(parsedData)
-      setLastUpdated(new Date())
-    } catch (err) {
-      console.error('Error fetching data:', err)
-      setError('Failed to load data. The file may not be shared publicly, or there may be a network issue. Try refreshing.')
-    } finally {
-      setIsLoading(false)
+  const updateField = (section, field, value) => {
+    setData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }))
+  }
+
+  const updateProductIssue = (index, field, value) => {
+    setData(prev => {
+      const newProducts = [...(prev.stock.productIssues || [])]
+      newProducts[index] = { ...newProducts[index], [field]: value }
+      return {
+        ...prev,
+        stock: { ...prev.stock, productIssues: newProducts }
+      }
+    })
+  }
+
+  const addProductIssue = () => {
+    if ((data.stock.productIssues || []).length < 10) {
+      setData(prev => ({
+        ...prev,
+        stock: {
+          ...prev.stock,
+          productIssues: [...(prev.stock.productIssues || []), { product: '', monthsCover: '' }]
+        }
+      }))
     }
   }
 
-  useEffect(() => {
-    fetchData()
-    const interval = setInterval(fetchData, 5 * 60 * 1000)
-    return () => clearInterval(interval)
-  }, [])
+  const removeProductIssue = (index) => {
+    setData(prev => ({
+      ...prev,
+      stock: {
+        ...prev.stock,
+        productIssues: prev.stock.productIssues.filter((_, i) => i !== index)
+      }
+    }))
+  }
+
+  const saveChanges = () => {
+    setIsEditing(false)
+    setLastUpdated(new Date())
+    localStorage.setItem('nutravetDashboardLastUpdated', new Date().toISOString())
+  }
+
+  const cancelChanges = () => {
+    const saved = localStorage.getItem('nutravetDashboardData')
+    if (saved) setData(JSON.parse(saved))
+    setIsEditing(false)
+  }
+
+  const resetToDefaults = () => {
+    if (window.confirm('Reset all data to defaults?')) {
+      setData(defaultData)
+      setLastUpdated(new Date())
+      localStorage.setItem('nutravetDashboardData', JSON.stringify(defaultData))
+      localStorage.setItem('nutravetDashboardLastUpdated', new Date().toISOString())
+    }
+  }
 
   const variance = data.international.forecastedOrders > 0 
     ? ((data.international.actualOrders - data.international.forecastedOrders) / data.international.forecastedOrders * 100).toFixed(1)
     : 0
-
-  if (isLoading) {
-    return (
-      <div style={{ minHeight: '100vh', background: brand.cream, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-        <div style={{ textAlign: 'center' }}>
-          <RefreshCw size={32} style={{ animation: 'spin 1s linear infinite', color: brand.brown }} />
-          <p style={{ marginTop: '12px', color: brand.brownLight }}>Loading dashboard...</p>
-        </div>
-        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-      </div>
-    )
-  }
 
   return (
     <div style={{ minHeight: '100vh', background: brand.cream, padding: '20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -305,49 +352,51 @@ export default function App() {
         <div style={{ background: 'white', borderRadius: '12px', border: `1px solid ${brand.creamDark}`, padding: '20px 24px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <svg width="140" height="36" viewBox="0 0 1000 120" style={{ marginRight: '8px' }}>
-                <text x="0" y="90" style={{ fontFamily: 'Georgia, serif', fontSize: '100px', fontWeight: 'bold', fill: brand.brown }}>nutra</text>
-                <text x="480" y="90" style={{ fontFamily: 'Georgia, serif', fontSize: '100px', fontWeight: 'normal', fill: brand.brownLighter }}>vet</text>
-              </svg>
+              <img src={LOGO_BASE64} alt="Nutravet" style={{ height: '40px' }} />
               <div style={{ borderLeft: `2px solid ${brand.creamDark}`, paddingLeft: '20px' }}>
                 <h1 style={{ fontSize: '22px', fontWeight: 700, color: brand.brown, margin: 0 }}>Monthly Ops Report</h1>
-                <p style={{ fontSize: '14px', color: brand.brownLight, margin: '4px 0 0' }}>{data.reportMonth}</p>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={data.reportMonth}
+                    onChange={(e) => setData(prev => ({ ...prev, reportMonth: e.target.value }))}
+                    style={{ fontSize: '14px', color: brand.brownLight, border: `2px solid ${brand.brown}`, borderRadius: '4px', padding: '4px 8px', marginTop: '4px' }}
+                  />
+                ) : (
+                  <p style={{ fontSize: '14px', color: brand.brownLight, margin: '4px 0 0' }}>{data.reportMonth}</p>
+                )}
               </div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <span style={{ fontSize: '12px', color: brand.brownLighter, marginRight: '8px' }}>
-                Updated: {lastUpdated.toLocaleString()}
+                Updated: {lastUpdated.toLocaleDateString()}
               </span>
-              <a
-                href={ONEDRIVE_SHARE_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px',
-                  background: brand.brown, border: 'none', borderRadius: '8px',
-                  fontSize: '14px', fontWeight: 500, color: 'white', cursor: 'pointer',
-                  textDecoration: 'none',
-                }}
-              >
-                <ExternalLink size={16} /> Edit in Excel
-              </a>
-              <button
-                onClick={fetchData}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px',
-                  background: 'white', border: `1px solid ${brand.creamDark}`, borderRadius: '8px',
-                  fontSize: '14px', fontWeight: 500, color: brand.brownLight, cursor: 'pointer',
-                }}
-              >
-                <RefreshCw size={16} /> Refresh
-              </button>
+              {isEditing ? (
+                <>
+                  <button onClick={saveChanges} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: brand.brown, border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 500, color: 'white', cursor: 'pointer' }}>
+                    <Save size={16} /> Save
+                  </button>
+                  <button onClick={cancelChanges} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: 'white', border: `1px solid ${brand.creamDark}`, borderRadius: '8px', fontSize: '14px', fontWeight: 500, color: brand.brownLight, cursor: 'pointer' }}>
+                    <X size={16} /> Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => setIsEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: brand.brown, border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 500, color: 'white', cursor: 'pointer' }}>
+                    <Edit3 size={16} /> Edit Data
+                  </button>
+                  <button onClick={resetToDefaults} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: 'white', border: `1px solid ${brand.creamDark}`, borderRadius: '8px', fontSize: '14px', fontWeight: 500, color: brand.brownLight, cursor: 'pointer' }}>
+                    <RefreshCw size={16} /> Reset
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        {error && (
-          <div style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '16px', marginBottom: '16px', color: '#b91c1c' }}>
-            <strong>⚠️ {error}</strong>
+        {isEditing && (
+          <div style={{ background: brand.creamDark, border: `1px solid ${brand.brownLighter}`, borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '14px', color: brand.brown }}>
+            ✏️ <strong>Edit Mode:</strong> Click on any value to change it. Press Save when done.
           </div>
         )}
 
@@ -360,15 +409,26 @@ export default function App() {
                 value={data.consumer.tiktokGMV} 
                 format="currency"
                 subtext={`${((data.consumer.tiktokGMV / data.consumer.tiktokTarget) * 100).toFixed(0)}% of target`}
+                isEditing={isEditing}
+                onChange={(v) => updateField('consumer', 'tiktokGMV', v)}
               />
-              <MetricCard label="Orders MTD" value={data.consumer.orders} />
+              <MetricCard 
+                label="Orders MTD" 
+                value={data.consumer.orders}
+                isEditing={isEditing}
+                onChange={(v) => updateField('consumer', 'orders', v)}
+              />
             </div>
             <div>
-              <StatusRow label="Dispatch SLA" value={data.consumer.dispatchSLA} thresholds={{ warning: 95, danger: 90 }} />
-              <StatusRow label="Response time" value={data.consumer.responseTime} thresholds={{ warning: 4, danger: 6 }} inverse format="hrs" />
+              <EditableStatusRow label="Dispatch SLA" value={data.consumer.dispatchSLA} isEditing={isEditing} onChange={(v) => updateField('consumer', 'dispatchSLA', v)} thresholds={{ warning: 95, danger: 90 }} />
+              <EditableStatusRow label="Response time" value={data.consumer.responseTime} isEditing={isEditing} onChange={(v) => updateField('consumer', 'responseTime', v)} thresholds={{ warning: 4, danger: 6 }} inverse format="hrs" />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
                 <span style={{ fontSize: '13px', color: brand.brownLight }}>Review score</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: brand.cream, color: brand.brown }}>{data.consumer.reviewScore}/5</span>
+                {isEditing ? (
+                  <input type="number" step="0.1" value={data.consumer.reviewScore} onChange={(e) => updateField('consumer', 'reviewScore', parseFloat(e.target.value) || 0)} style={{ width: '70px', padding: '3px 8px', fontSize: '11px', border: `2px solid ${brand.brown}`, borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: brand.cream, color: brand.brown }}>{data.consumer.reviewScore}/5</span>
+                )}
               </div>
             </div>
           </Section>
@@ -380,15 +440,19 @@ export default function App() {
                 value={data.trade.outstandingDebt} 
                 format="currency"
                 subtext={`${data.trade.overdueInvoices} invoices overdue`}
+                isEditing={isEditing}
+                onChange={(v) => updateField('trade', 'outstandingDebt', v)}
               />
               <MetricCard 
                 label="Avg days to pay" 
                 value={data.trade.avgDaysToPay}
                 subtext="Target: 30 days"
+                isEditing={isEditing}
+                onChange={(v) => updateField('trade', 'avgDaysToPay', v)}
               />
             </div>
             <div>
-              <StatusRow label="Order fulfilment" value={data.trade.orderFulfilment} thresholds={{ warning: 97, danger: 95 }} noBorder />
+              <EditableStatusRow label="Order fulfilment" value={data.trade.orderFulfilment} isEditing={isEditing} onChange={(v) => updateField('trade', 'orderFulfilment', v)} thresholds={{ warning: 97, danger: 95 }} noBorder />
             </div>
           </Section>
 
@@ -396,18 +460,33 @@ export default function App() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px', marginBottom: '12px' }}>
               <div style={{ background: brand.cream, borderRadius: '8px', padding: '12px' }}>
                 <div style={{ fontSize: '10px', color: brand.brownLight, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Orders vs forecast</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                  <span style={{ fontSize: '20px', fontWeight: 600, color: brand.brown }}>{variance > 0 ? '+' : ''}{variance}%</span>
-                  {variance >= 0 ? <TrendingUp size={14} color="#059669" /> : <TrendingDown size={14} color="#dc2626" />}
-                </div>
-                <div style={{ fontSize: '11px', color: brand.brownLighter, marginTop: '4px' }}>
-                  {data.international.actualOrders.toLocaleString()} actual vs {data.international.forecastedOrders.toLocaleString()} forecast
-                </div>
+                {isEditing ? (
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <div>
+                      <div style={{ fontSize: '10px', color: brand.brownLighter, marginBottom: '2px' }}>Actual:</div>
+                      <input type="number" value={data.international.actualOrders} onChange={(e) => updateField('international', 'actualOrders', parseInt(e.target.value) || 0)} style={{ width: '80px', padding: '4px 8px', fontSize: '14px', border: `2px solid ${brand.brown}`, borderRadius: '6px' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '10px', color: brand.brownLighter, marginBottom: '2px' }}>Forecast:</div>
+                      <input type="number" value={data.international.forecastedOrders} onChange={(e) => updateField('international', 'forecastedOrders', parseInt(e.target.value) || 0)} style={{ width: '80px', padding: '4px 8px', fontSize: '14px', border: `2px solid ${brand.brown}`, borderRadius: '6px' }} />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                      <span style={{ fontSize: '20px', fontWeight: 600, color: brand.brown }}>{variance > 0 ? '+' : ''}{variance}%</span>
+                      {variance >= 0 ? <TrendingUp size={14} color="#059669" /> : <TrendingDown size={14} color="#dc2626" />}
+                    </div>
+                    <div style={{ fontSize: '11px', color: brand.brownLighter, marginTop: '4px' }}>
+                      {data.international.actualOrders.toLocaleString()} actual vs {data.international.forecastedOrders.toLocaleString()} forecast
+                    </div>
+                  </>
+                )}
               </div>
             </div>
             <div>
-              <StatusRow label="Data accuracy" value={data.international.dataAccuracy} thresholds={{ warning: 95, danger: 90 }} />
-              <StatusRow label="Forecast variance" value={data.international.forecastVariance} thresholds={{ warning: 10, danger: 15 }} inverse format="percent" noBorder />
+              <EditableStatusRow label="Data accuracy" value={data.international.dataAccuracy} isEditing={isEditing} onChange={(v) => updateField('international', 'dataAccuracy', v)} thresholds={{ warning: 95, danger: 90 }} />
+              <EditableStatusRow label="Forecast variance" value={data.international.forecastVariance} isEditing={isEditing} onChange={(v) => updateField('international', 'forecastVariance', v)} thresholds={{ warning: 10, danger: 15 }} inverse format="percent" noBorder />
             </div>
           </Section>
 
@@ -416,22 +495,38 @@ export default function App() {
               <div style={{ fontSize: '10px', color: brand.brownLight, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Recognition scheme</div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
                 <span style={{ color: brand.brownLight }}>Nominations this month</span>
-                <span style={{ fontWeight: 600, color: brand.brown }}>{data.management.nominations}/{data.management.nominationTarget}</span>
+                {isEditing ? (
+                  <input type="number" value={data.management.nominations} onChange={(e) => updateField('management', 'nominations', parseInt(e.target.value) || 0)} style={{ width: '50px', padding: '2px 6px', fontSize: '12px', border: `2px solid ${brand.brown}`, borderRadius: '4px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ fontWeight: 600, color: brand.brown }}>{data.management.nominations}/{data.management.nominationTarget}</span>
+                )}
               </div>
               <ProgressBar value={data.management.nominations} max={data.management.nominationTarget} />
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: `1px solid ${brand.cream}` }}>
                 <span style={{ fontSize: '13px', color: brand.brownLight }}>Facilities tickets open</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#fef3c7', color: '#b45309' }}>{data.management.facilitiesTickets}</span>
+                {isEditing ? (
+                  <input type="number" value={data.management.facilitiesTickets} onChange={(e) => updateField('management', 'facilitiesTickets', parseInt(e.target.value) || 0)} style={{ width: '50px', padding: '3px 8px', fontSize: '11px', border: `2px solid ${brand.brown}`, borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#fef3c7', color: '#b45309' }}>{data.management.facilitiesTickets}</span>
+                )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: `1px solid ${brand.cream}` }}>
                 <span style={{ fontSize: '13px', color: brand.brownLight }}>H&S incidents (MTD)</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#d1fae5', color: '#047857' }}>{data.management.hsIncidents}</span>
+                {isEditing ? (
+                  <input type="number" value={data.management.hsIncidents} onChange={(e) => updateField('management', 'hsIncidents', parseInt(e.target.value) || 0)} style={{ width: '50px', padding: '3px 8px', fontSize: '11px', border: `2px solid ${brand.brown}`, borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: '#d1fae5', color: '#047857' }}>{data.management.hsIncidents}</span>
+                )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
                 <span style={{ fontSize: '13px', color: brand.brownLight }}>Near misses reported</span>
-                <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: brand.cream, color: brand.brown }}>{data.management.nearMisses}</span>
+                {isEditing ? (
+                  <input type="number" value={data.management.nearMisses} onChange={(e) => updateField('management', 'nearMisses', parseInt(e.target.value) || 0)} style={{ width: '50px', padding: '3px 8px', fontSize: '11px', border: `2px solid ${brand.brown}`, borderRadius: '6px', textAlign: 'center' }} />
+                ) : (
+                  <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500, background: brand.cream, color: brand.brown }}>{data.management.nearMisses}</span>
+                )}
               </div>
             </div>
           </Section>
@@ -443,12 +538,16 @@ export default function App() {
                 value={data.website.adSpend} 
                 format="currency"
                 subtext={`Budget: £${data.website.adBudget.toLocaleString()}`}
+                isEditing={isEditing}
+                onChange={(v) => updateField('website', 'adSpend', v)}
               />
               <MetricCard 
                 label="ROAS" 
                 value={data.website.roas} 
                 format="multiple"
                 subtext="Target: 4x"
+                isEditing={isEditing}
+                onChange={(v) => updateField('website', 'roas', v)}
               />
             </div>
             <div>
@@ -468,46 +567,72 @@ export default function App() {
                 value={data.suppliers.ytdSpend} 
                 format="currency"
                 trend={data.suppliers.lySpend > 0 ? parseFloat(((data.suppliers.ytdSpend - data.suppliers.lySpend) / data.suppliers.lySpend * 100).toFixed(1)) : 0}
+                isEditing={isEditing}
+                onChange={(v) => updateField('suppliers', 'ytdSpend', v)}
               />
               <MetricCard 
                 label="Orders last month" 
                 value={data.suppliers.ordersLastMonth}
                 subtext={`${data.suppliers.activeSuppliers} suppliers`}
+                isEditing={isEditing}
+                onChange={(v) => updateField('suppliers', 'ordersLastMonth', v)}
               />
             </div>
             <div>
-              <StatusRow label="On-time delivery" value={data.suppliers.onTimeDelivery} thresholds={{ warning: 93, danger: 90 }} />
-              <StatusRow label="Quality pass rate" value={data.suppliers.qualityPassRate} thresholds={{ warning: 97, danger: 95 }} noBorder />
+              <EditableStatusRow label="On-time delivery" value={data.suppliers.onTimeDelivery} isEditing={isEditing} onChange={(v) => updateField('suppliers', 'onTimeDelivery', v)} thresholds={{ warning: 93, danger: 90 }} />
+              <EditableStatusRow label="Quality pass rate" value={data.suppliers.qualityPassRate} isEditing={isEditing} onChange={(v) => updateField('suppliers', 'qualityPassRate', v)} thresholds={{ warning: 97, danger: 95 }} noBorder />
             </div>
           </Section>
 
           <Section title="Stock" icon={Package} fullWidth>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
-              <MetricCard label="Holding value" value={data.stock.holdingValue} format="currency" />
-              <MetricCard label="Avg margin" value={data.stock.avgMargin} format="percent" />
-              <MetricCard label="SKUs in stock" value={data.stock.skusInStock} />
+              <MetricCard label="Holding value" value={data.stock.holdingValue} format="currency" isEditing={isEditing} onChange={(v) => updateField('stock', 'holdingValue', v)} />
+              <MetricCard label="Avg margin" value={data.stock.avgMargin} format="percent" isEditing={isEditing} onChange={(v) => updateField('stock', 'avgMargin', v)} />
+              <MetricCard label="SKUs in stock" value={data.stock.skusInStock} isEditing={isEditing} onChange={(v) => updateField('stock', 'skusInStock', v)} />
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div>
                 <div style={{ fontSize: '10px', color: brand.brownLight, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Stock alerts</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <AlertItem count={data.stock.expiryAlert} label="approaching expiry (next 30 days)" severity="danger" />
-                  <AlertItem count={data.stock.belowReorder} label="below reorder point" severity="warning" />
-                  <AlertItem count={data.stock.slowMoving} label="with slow-moving flag (>90 days)" severity="info" />
+                  <AlertItem count={data.stock.expiryAlert} label="approaching expiry (next 30 days)" severity="danger" isEditing={isEditing} onChange={(v) => updateField('stock', 'expiryAlert', v)} />
+                  <AlertItem count={data.stock.belowReorder} label="below reorder point" severity="warning" isEditing={isEditing} onChange={(v) => updateField('stock', 'belowReorder', v)} />
+                  <AlertItem count={data.stock.slowMoving} label="with slow-moving flag (>90 days)" severity="info" isEditing={isEditing} onChange={(v) => updateField('stock', 'slowMoving', v)} />
                 </div>
               </div>
               
               <div>
-                <div style={{ fontSize: '10px', color: brand.brownLight, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Products with potential issues</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <div style={{ fontSize: '10px', color: brand.brownLight, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Products with potential issues</div>
+                  {isEditing && (data.stock.productIssues || []).length < 10 && (
+                    <button onClick={addProductIssue} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 10px', background: brand.cream, border: `1px solid ${brand.creamDark}`, borderRadius: '6px', fontSize: '12px', color: brand.brown, cursor: 'pointer' }}>
+                      <Plus size={12} /> Add
+                    </button>
+                  )}
+                </div>
+                {isEditing && (
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', fontSize: '11px', color: brand.brownLighter }}>
+                    <span style={{ flex: 1 }}>Product name</span>
+                    <span style={{ width: '80px', textAlign: 'center' }}>Months cover</span>
+                    <span style={{ width: '30px' }}></span>
+                  </div>
+                )}
                 <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                  {data.products && data.products.length > 0 ? (
-                    data.products.map((item, index) => (
-                      <ProductIssueRow key={index} product={item.product} monthsCover={item.monthsCover} />
-                    ))
-                  ) : (
+                  {(data.stock.productIssues || []).map((item, index) => (
+                    <ProductIssueRow
+                      key={index}
+                      product={item.product}
+                      monthsCover={item.monthsCover}
+                      isEditing={isEditing}
+                      onProductChange={(v) => updateProductIssue(index, 'product', v)}
+                      onMonthsChange={(v) => updateProductIssue(index, 'monthsCover', v)}
+                      onDelete={() => removeProductIssue(index)}
+                      showDelete={(data.stock.productIssues || []).length > 1}
+                    />
+                  ))}
+                  {!isEditing && (data.stock.productIssues || []).filter(p => p.product || p.monthsCover).length === 0 && (
                     <div style={{ fontSize: '13px', color: brand.brownLighter, fontStyle: 'italic', padding: '12px', background: brand.cream, borderRadius: '6px' }}>
-                      No product issues listed
+                      No product issues listed. Click "Edit Data" to add.
                     </div>
                   )}
                 </div>
