@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, CheckCircle, RefreshCw, ShoppingBag, CreditCa
 // Nutravet logo as inline SVG component - clean text version matching brand
 const NutravetLogo = () => (
   <svg viewBox="0 0 200 40" style={{ height: '40px', width: 'auto' }}>
-    <text x="0" y="32" style={{ fontFamily: 'Georgia, serif', fontSize: '36px', fill: '#4a3728' }}>
+    <text x="0" y="32" style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: '36px', fill: '#4a3728' }}>
       <tspan style={{ fontWeight: '700' }}>nutra</tspan>
       <tspan style={{ fontWeight: '400' }}>vet</tspan>
     </text>
