@@ -3,11 +3,9 @@ import { TrendingUp, TrendingDown, CheckCircle, RefreshCw, ShoppingBag, CreditCa
 import * as XLSX from 'xlsx'
 
 // =====================================================
-// PASTE YOUR ONEDRIVE SHARING LINK HERE
+// YOUR ONEDRIVE LINK
 // =====================================================
-const ONEDRIVE_SHARE_LINK = 'https://nutravetuk.sharepoint.com/:x:/s/NutravetDocuments/IQCxYwW2yhXSQaVsEfkEuFVjAXf0AFDa3CkDYKVHUS-QpgY?e=wOQ1L1'
-// Example: 'https://1drv.ms/x/s!AjXXXXXXXXXX'
-// Or: 'https://company-my.sharepoint.com/:x:/g/personal/...'
+const ONEDRIVE_SHARE_LINK = 'https://onedrive.live.com/:x:/g/personal/648F2F7F0BD66099/IQD3_Nq3wITSRrx7FQwtdIS1AdCoTWz8vG4PbazbyitCLxM?resid=648F2F7F0BD66099!sb7dafcf784c046d2bc7b150c2d7484b5&ithint=file%2Cxlsx&e=GvGV8U&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL3gvYy82NDhmMmY3ZjBiZDY2MDk5L0lRRDNfTnEzd0lUU1JyeDdGUXd0ZElTMUFkQ29UV3o4dkc0UGJhemJ5aXRDTHhNP2U9R3ZHVjhV'
 
 // Nutravet brand colors
 const brand = {
@@ -33,21 +31,20 @@ const defaultData = {
 
 // Convert OneDrive share link to download link
 const getDownloadUrl = (shareLink) => {
-  if (shareLink === 'PASTE_YOUR_LINK_HERE') return null
+  if (!shareLink || shareLink === 'PASTE_YOUR_LINK_HERE') return null
   
-  // Handle 1drv.ms short links
-  if (shareLink.includes('1drv.ms')) {
-    // Convert to base64 and create API URL
-    const base64 = btoa(shareLink).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  try {
+    // For any OneDrive/1drv link, use the sharing API
+    // Encode the share URL in base64 and use the OneDrive API
+    const base64 = btoa(shareLink)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')
     return `https://api.onedrive.com/v1.0/shares/u!${base64}/root/content`
+  } catch (e) {
+    console.error('Error creating download URL:', e)
+    return null
   }
-  
-  // Handle SharePoint links - try to convert to download
-  if (shareLink.includes('sharepoint.com')) {
-    return shareLink.replace(':x:', ':x:').replace(/\?.*$/, '') + '?download=1'
-  }
-  
-  return shareLink
 }
 
 // Parse Excel data
@@ -253,7 +250,7 @@ export default function App() {
     const downloadUrl = getDownloadUrl(ONEDRIVE_SHARE_LINK)
     
     if (!downloadUrl) {
-      setError('OneDrive link not configured. See instructions below.')
+      setError('OneDrive link not configured.')
       setIsLoading(false)
       return
     }
@@ -263,7 +260,7 @@ export default function App() {
     
     try {
       const response = await fetch(downloadUrl)
-      if (!response.ok) throw new Error('Failed to fetch Excel file')
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       
       const arrayBuffer = await response.arrayBuffer()
       const workbook = XLSX.read(arrayBuffer, { type: 'array' })
@@ -273,7 +270,7 @@ export default function App() {
       setLastUpdated(new Date())
     } catch (err) {
       console.error('Error fetching data:', err)
-      setError('Failed to load data. Check that the OneDrive link is correct and the file is shared publicly.')
+      setError('Failed to load data. The file may not be shared publicly, or there may be a network issue. Try refreshing.')
     } finally {
       setIsLoading(false)
     }
@@ -322,7 +319,7 @@ export default function App() {
                 Updated: {lastUpdated.toLocaleString()}
               </span>
               <a
-                href={ONEDRIVE_SHARE_LINK !== 'PASTE_YOUR_LINK_HERE' ? ONEDRIVE_SHARE_LINK : '#'}
+                href={ONEDRIVE_SHARE_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -351,18 +348,6 @@ export default function App() {
         {error && (
           <div style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '16px', marginBottom: '16px', color: '#b91c1c' }}>
             <strong>⚠️ {error}</strong>
-            {ONEDRIVE_SHARE_LINK === 'PASTE_YOUR_LINK_HERE' && (
-              <div style={{ marginTop: '12px', fontSize: '14px', color: '#7f1d1d' }}>
-                <p><strong>Setup instructions:</strong></p>
-                <ol style={{ marginLeft: '20px', marginTop: '8px' }}>
-                  <li>Upload the Excel template to OneDrive</li>
-                  <li>Right-click the file → Share → "Anyone with the link can view"</li>
-                  <li>Copy the sharing link</li>
-                  <li>Paste it in App.jsx (line 8)</li>
-                  <li>Push to GitHub to redeploy</li>
-                </ol>
-              </div>
-            )}
           </div>
         )}
 
